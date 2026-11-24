@@ -24,7 +24,11 @@ def prediction_careamist(
     output_path: Path,
 ):
     """function to denoised a dataset according to a pretrained model using careamics"""
-    careamics_pretrained = CAREamist(checkpoint_path=ckpt_path)
+    # work_dir defaults to the current directory (/bilayers), which is
+    # read-only under Apptainer/Singularity; keep logs next to the outputs.
+    careamics_pretrained = CAREamist(
+        checkpoint_path=ckpt_path, work_dir=output_path, enable_progress_bar=False
+    )
     careamics_pretrained.predict_to_disk(
         pred_data=data_path,
         prediction_dir=output_path / "predictions",
