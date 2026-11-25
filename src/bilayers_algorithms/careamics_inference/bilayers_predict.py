@@ -152,7 +152,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 def main(argv: Sequence[str] | None = None) -> None:
     args = parse_args(argv)
     checkpoint = resolve_checkpoint(args.ckpt_path)
-    with tempfile.TemporaryDirectory() as temp_dir:
+    # Keep intermediate files inside the output folder, not /tmp: under
+    # `apptainer --containall`, /tmp is a 64 MB in-memory area by default.
+    args.output_path.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(
+        dir=args.output_path, prefix=".careamics_work_"
+    ) as temp_dir:
         work_dir = Path(temp_dir)
         try:
             subprocess.run(
