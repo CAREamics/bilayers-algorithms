@@ -1,0 +1,30 @@
+Bootstrap: docker
+From: python:3.11-slim
+
+# Apptainer/Singularity equivalent of the Dockerfile in this folder.
+# Build from this folder:  apptainer build --fakeroot careamics.sif Apptainer.def
+# To change the version:   apptainer build --fakeroot --build-arg CAREAMICS_VERSION=x.y.z ...
+
+%arguments
+    CAREAMICS_VERSION=0.3.5
+
+%files
+    predict.py /usr/local/bin/predict.py
+    bilayers_predict.py /usr/local/bin/bilayers_predict.py
+
+%post
+    pip install --no-cache-dir torch==2.7.1 torchvision==0.22.1 \
+        --index-url https://download.pytorch.org/whl/cpu
+    pip install --no-cache-dir careamics=={{ CAREAMICS_VERSION }}
+    chmod +x /usr/local/bin/predict.py /usr/local/bin/bilayers_predict.py
+    # Docker's WORKDIR creates /bilayers; Apptainer images are read-only at
+    # run time, so the folders Bilayers mounts into must exist in the image.
+    mkdir -p /bilayers/input_images /bilayers/model /bilayers/output_images
+
+%runscript
+    cd /bilayers
+    exec "$@"
+
+%labels
+    org.opencontainers.image.title careamics
+    org.opencontainers.image.version 0.3.5

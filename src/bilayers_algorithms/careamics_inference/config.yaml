@@ -1,0 +1,134 @@
+citations:
+  - name: "CAREamics"
+    doi: "https://careamics.github.io/latest/"
+    license: "BSD-3-Clause"
+    description: "Restoration of microscopy images with deep learning (N2V, N2N, CARE) using a trained CAREamics checkpoint"
+
+docker_image:
+  org: bilayer
+  name: careamics
+  tag: "0.3.5"
+  platform: "linux/amd64"
+
+algorithm_folder_name: "careamics_inference"
+
+exec_function:
+  name: "generate_cli_command"
+  cli_command: "bilayers_predict.py"
+  hidden_args:
+
+inputs:
+  - name: input_images
+    type: image
+    label: "Images to restore"
+    subtype:
+      - grayscale
+    description: "Noisy or low-quality images to restore"
+    cli_tag: "--data"
+    cli_order: 0
+    default: "directory"
+    optional: False
+    format:
+      - tif
+      - tiff
+    folder_name: "/bilayers/input_images"
+    file_count: multiple
+    unique_string:
+      - "*"
+    section_id: "inputs"
+    mode: "beginner"
+    depth: True
+    timepoints: True
+    tiled: False
+    pyramidal: False
+  - name: model
+    type: file
+    label: "Trained model (.ckpt)"
+    description: "A single CAREamics checkpoint, e.g. from careamics_n2v_training or the Nextflow pipeline. Training folders contain several .ckpt files; choose the one ending in _last.ckpt"
+    cli_tag: "--ckpt_path"
+    cli_order: 0
+    default: "single"
+    optional: False
+    format:
+      - ckpt
+    folder_name: "/bilayers/model"
+    file_count: single
+    unique_string:
+      - "*"
+    section_id: "inputs"
+    mode: "beginner"
+
+outputs:
+  - name: predictions
+    type: image
+    label: "Restored images"
+    subtype:
+      - grayscale
+    description: "Restored images, one per input, named <input name>_restored"
+    cli_tag: "None"
+    cli_order: 0
+    default: "directory"
+    optional: False
+    format:
+      - tif
+      - tiff
+    folder_name: "/bilayers/output_images"
+    file_count: multiple
+    unique_string:
+      - "_restored"
+    section_id: "outputs"
+    mode: "beginner"
+    depth: True
+    timepoints: True
+    tiled: False
+    pyramidal: False
+
+parameters:
+  - name: axes
+    type: textbox
+    label: "Axes"
+    description: "Axes of the input images, e.g. YX, ZYX, SYX. Leave empty to use the axes stored in the model"
+    default: ""
+    cli_tag: "--axes"
+    optional: True
+    section_id: "input-args"
+    mode: "beginner"
+  - name: tile_size
+    type: textbox
+    label: "Tile size"
+    description: "Space-separated spatial tile size, e.g. '256 256' (2D) or '32 128 128' (3D). Each size must be a multiple of 4. Leave empty to predict whole images, which only works when the image height and width are multiples of 4"
+    default: ""
+    cli_tag: "--tile_size"
+    optional: True
+    section_id: "advanced-args"
+    mode: "advanced"
+  - name: tile_overlap
+    type: textbox
+    label: "Tile overlap"
+    description: "Space-separated tile overlap, e.g. '48 48'"
+    default: ""
+    cli_tag: "--tile_overlap"
+    optional: True
+    section_id: "advanced-args"
+    mode: "advanced"
+  - name: batch_size
+    type: integer
+    label: "Batch size"
+    description: "Number of tiles or images predicted at once"
+    default: 1
+    cli_tag: "--batch_size"
+    optional: True
+    section_id: "advanced-args"
+    mode: "advanced"
+  - name: output_path
+    type: textbox
+    label: "Output directory"
+    description: "Directory where restored images are written"
+    output_dir_set: True
+    default: "/bilayers/output_images"
+    cli_tag: "--output_path"
+    optional: False
+    section_id: "output-args"
+    mode: "advanced"
+
+display_only:
