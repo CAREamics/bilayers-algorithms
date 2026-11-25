@@ -44,7 +44,7 @@ inputs:
   - name: model
     type: file
     label: "Trained model (.ckpt)"
-    description: "A CAREamics checkpoint, e.g. from careamics_n2v_training or the Nextflow pipeline"
+    description: "A single CAREamics checkpoint, e.g. from careamics_n2v_training or the Nextflow pipeline. Training folders contain several .ckpt files; choose the one ending in _last.ckpt"
     cli_tag: "--ckpt_path"
     cli_order: 0
     default: "single"
@@ -96,7 +96,7 @@ parameters:
   - name: tile_size
     type: textbox
     label: "Tile size"
-    description: "Space-separated spatial tile size, e.g. '256 256'. Leave empty to predict whole images"
+    description: "Space-separated spatial tile size, e.g. '256 256' (2D) or '32 128 128' (3D). Each size must be a multiple of 4. Leave empty to predict whole images, which only works when the image height and width are multiples of 4"
     default: ""
     cli_tag: "--tile_size"
     optional: True
